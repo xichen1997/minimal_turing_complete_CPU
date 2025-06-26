@@ -13,13 +13,12 @@ BUILD_DIR = build
 
 # Source files
 LEXER_SRC = $(SRC_DIR)/lexer.cpp
+PARSER_SRC = $(SRC_DIR)/parser.cpp
 TEST_SRC = $(TEST_DIR)/test_lexer.cpp
 
 # Executables
 LEXER_TEST = $(BUILD_DIR)/test_lexer
 
-# Test files
-TEST_INPUT = demo.dsl
 
 # Default target
 all: test

@@ -14,6 +14,7 @@ class Lexer{
     static TokenType keyWord(const std::string& s);
 public:
     explicit Lexer(std::string text):src(std::move(text)) {} // doesn't allow copy or move
-    Token genNextToken();   
+    Token genNextToken();
+    Token peekNextToken() const; // peek at next token without consuming it
 };
 
