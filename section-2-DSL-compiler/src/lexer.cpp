@@ -71,3 +71,53 @@ Token Lexer::genNextToken(){
     // if the first character is not a number or identifier, it's an error, throw an exception about the line and column number
     throw std::runtime_error("Unexpected character: " + std::string(1, c) + " at line " + std::to_string(startline) + " column " + std::to_string(startcol));
 }
+
+Token Lexer::peekNextToken() const {
+    // Create a temporary lexer with the same state to peek ahead
+    Lexer tempLexer(src);
+    tempLexer.pos = pos;
+    tempLexer.line = line;
+    tempLexer.column = column;
+    
+    // Skip whitespace and comments (same logic as genNextToken)
+    while (std::isspace(tempLexer.peek()) || (tempLexer.peek()=='/' && tempLexer.pos+1<tempLexer.src.size() && tempLexer.src[tempLexer.pos+1]=='/')) {
+        if (tempLexer.peek()=='/') {
+            while (tempLexer.peek() && tempLexer.peek()!='\n') tempLexer.get();
+        } else tempLexer.get();
+    }
+    
+    int startline = tempLexer.line, startcol = tempLexer.column;
+    char c = tempLexer.peek();
+    
+    if(c == '\0') return {TokenType::TOKEN_EOF, "", startline, startcol};
+
+    // for the number
+    if(std::isdigit(c)) {
+        std::string num;
+        while(std::isdigit(tempLexer.peek())) num += tempLexer.get();
+        return {TokenType::NUMBER, num, startline, startcol};
+    }
+
+    // for the identifier and keyword
+    if (std::isalpha(c) || c=='_') {
+        std::string id;
+        while (std::isalnum(tempLexer.peek()) || tempLexer.peek()=='_') id.push_back(tempLexer.get());
+        return {keyWord(id), id, startline, startcol};
+    }
+
+    // for the operator
+    tempLexer.get();
+    switch(c) {
+        case '+': return {TokenType::OP_PLUS, "+", startline, startcol};
+        case '-': return {TokenType::OP_MINUS, "-", startline, startcol};
+        case ':': return {TokenType::COLON,   ":", startline, startcol};
+        case ';': return {TokenType::SEMICOLON,";",startline, startcol};
+        case '=': return {TokenType::EQUAL,   "=", startline, startcol};
+        case '<':
+            if (tempLexer.peek()=='=') { tempLexer.get(); return {TokenType::OP_LEQ,"<=",startline,startcol}; }
+            break;
+        default:
+            throw std::runtime_error("Unexpected character: " + std::string(1, c) + " at line " + std::to_string(startline) + " column " + std::to_string(startcol));
+    }
+    throw std::runtime_error("Unexpected character: " + std::string(1, c) + " at line " + std::to_string(startline) + " column " + std::to_string(startcol));
+}
