@@ -59,7 +59,7 @@ std::string Parser::parseExpr() {
         TokenType op = currentToken.type;
         advance();                    // get a '+' or '-'
         std::string right = parseTerm(); // parse the right term
-        std::string tmpVariable = genTempVar();  // get a temporary variable.
+        std::string tmpVariable = genTempVar();  // get a temporary variable. and spill back to RAM.
         if (op == TokenType::OP_PLUS) {
             ir.push_back(IR{OpCode::ADD, left, right, tmpVariable});
         } else {
@@ -177,10 +177,10 @@ void Parser::parseLabel() {
 }
 
 void Parser::parseHalt() {
-    expect(TokenType::KW_HALT);       // 匹配 halt
-    expect(TokenType::SEMICOLON);     // 匹配 ;
+    expect(TokenType::KW_HALT);       // match halt
+    expect(TokenType::SEMICOLON);     // match semincolon
 
-    ir.push_back(IR{OpCode::HALT, "", "", ""});  // 添加 HALT 指令
+    ir.push_back(IR{OpCode::HALT, "", "", ""});  // halt
 }
 
 // parse assignment statement
@@ -277,3 +277,4 @@ void Parser::printIR() {
         }
     }
 }
+

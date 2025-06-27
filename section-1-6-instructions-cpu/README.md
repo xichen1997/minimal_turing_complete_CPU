@@ -12,7 +12,9 @@ The CPU implements a simple von Neumann architecture with the following componen
 - **Instruction Set**:
   - `HALT (0x00)`: Stops program execution
   - `LOAD (0x01)`: Loads data from memory into register
-  - `STORE (0x02)`: Stores register value into memory
+  - `LOAD_CONST (0x02)` : Loads data from constant
+  - `STORE (0x03)`: Stores register value into memory
+  - `STORE_CONST (0x04)`: Stores constant
   - `ADD (0x03)`: Adds two register values
   - `SUB (0x04)`: Subtracts two register values
   - `JNZ (0x05)`: Jump if register is not zero

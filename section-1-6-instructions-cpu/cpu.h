@@ -26,35 +26,42 @@ public:
                     halted = true;
                     break;
                 case 0x01: { // LOAD Rd, addr
-                    uint8_t rd = fetch();
+                    uint8_t rd = fetch(); // use temp variable to replace the rd. If tempID is <=3, then use R[tempID]
                     uint16_t addr = (fetch() << 8) | fetch();
                     R[rd] = RAM[addr];
                     break;
                 }
-                case 0x02: { // STORE addr, Rs
+                case 0x02: { // LOAD Rd, CONST
+                    uint8_t rd = fetch();
+                    uint8_t const = fetch();
+                    R[rd] = const;
+                    break;
+                }
+                case 0x03: { // STORE addr, Rs
                     uint16_t addr = (fetch() << 8) | fetch();
                     uint8_t rs = fetch();
                     RAM[addr] = R[rs];
-
-                    // 模拟屏幕输出
-                    if (addr == 0xFF00) {
-                        std::cout << "OUTPUT: " << static_cast<char>(RAM[addr]) << "\n";
-                    }
                     break;
                 }
-                case 0x03: { // ADD Rd, Rs
+                case 0x04: { // STORE_CONST addr, CONST
+                    uint16_t addr = (fetch() << 8) | fetch();
+                    uint8_t conVar = fetch();
+                    RAM[addr] = conVar;
+                    break;
+                }
+                case 0x05: { // ADD Rd, Rs
                     uint8_t rd = fetch();
                     uint8_t rs = fetch();
                     R[rd] += R[rs];
                     break;
                 }
-                case 0x04: { // SUB Rd, Rs
+                case 0x06: { // SUB Rd, Rs
                     uint8_t rd = fetch();
                     uint8_t rs = fetch();
                     R[rd] -= R[rs];
                     break;
                 }
-                case 0x05: { // JNZ Rd, addr
+                case 0x07: { // JNZ Rd, addr
                     uint8_t rd = fetch();
                     uint16_t addr = (fetch() << 8) | fetch();
                     if (R[rd] != 0) {
