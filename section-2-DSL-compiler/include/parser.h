@@ -13,8 +13,8 @@ enum class OpCode{
 };
 
 struct IR{
-    OpCode op;
-    std::string arg1, arg2, result;
+    OpCode op; // operation code
+    std::string arg1, arg2, result; // arg1: variable name, arg2: constant value, result: temporary variable name
 };
 
 class Parser{
@@ -46,6 +46,7 @@ public:
     // for debug and test
     void printIR();
     size_t getIRSize() const { return ir.size(); }
+    const std::vector<IR>& getIR() const { return ir; }
 };
 
 
