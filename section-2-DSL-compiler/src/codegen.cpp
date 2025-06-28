@@ -110,7 +110,7 @@ void Codegen::generateCode() {
             case OpCode::STORE: {
                 // STORE addr1, addr2 store the value of addr2 to addr1
                 uint16_t addr1 = allocateVar(instruction.arg1);
-                uint16_t addr2 = allocateVar(instruction.arg2);
+                uint16_t addr2 = allocateVar(instruction.result);
                 // LOAD addr2, R0
                 code.push_back(0x02); // LOAD Rd, addr
                 code.push_back(0x00); // R0
