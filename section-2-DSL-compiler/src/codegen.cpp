@@ -80,7 +80,7 @@ void Codegen::generateCode() {
                     // it's a variable, then load the variable to the output register
                     // first load to the R0
                     // LOAD_VAR R0, varAddress
-                    code.push_back(0x02); // LOAD Rd, addr
+                    code.push_back(0x01); // LOAD Rd, addr
                     code.push_back(0x00); // R0
                     uint16_t varAddress = allocateVar(instruction.arg1);
                     code.push_back(varAddress >> 8);
@@ -109,10 +109,10 @@ void Codegen::generateCode() {
                 break;
             case OpCode::STORE: {
                 // STORE addr1, addr2 store the value of addr2 to addr1
-                uint16_t addr1 = allocateVar(instruction.arg1);
-                uint16_t addr2 = allocateVar(instruction.result);
+                uint16_t addr1 = allocateVar(instruction.result);
+                uint16_t addr2 = allocateVar(instruction.arg1);
                 // LOAD addr2, R0
-                code.push_back(0x02); // LOAD Rd, addr
+                code.push_back(0x01); // LOAD Rd, addr
                 code.push_back(0x00); // R0
                 code.push_back(addr2 >> 8); // addr high
                 code.push_back(addr2 & 0xFF); // addr low
@@ -122,16 +122,17 @@ void Codegen::generateCode() {
                 code.push_back(addr1 & 0xFF); // addr low
                 code.push_back(0x00); // R0
                 break;
+                
             }
             case OpCode::ADD: {
                 // LOAD R0, var1
-                code.push_back(0x02); 
+                code.push_back(0x01); 
                 code.push_back(0x00); // R0
                 uint16_t varAddress = allocateVar(instruction.arg1);
                 code.push_back(varAddress >> 8);
                 code.push_back(varAddress & 0xFF);
                 // LOAD R1, var2
-                code.push_back(0x02);
+                code.push_back(0x01);
                 code.push_back(0x01); // R1
                 varAddress = allocateVar(instruction.arg2);
                 code.push_back(varAddress >> 8);
@@ -150,13 +151,13 @@ void Codegen::generateCode() {
             }
             case OpCode::SUB: {
                 // LOAD R0, var1
-                code.push_back(0x02);
+                code.push_back(0x01);
                 code.push_back(0x00); // R0
                 uint16_t varAddress = allocateVar(instruction.arg1);
                 code.push_back(varAddress >> 8);
                 code.push_back(varAddress & 0xFF);
                 // LOAD R1, var2
-                code.push_back(0x02);
+                code.push_back(0x01);
                 code.push_back(0x01); // R1
                 varAddress = allocateVar(instruction.arg2);
                 code.push_back(varAddress >> 8);
@@ -173,15 +174,24 @@ void Codegen::generateCode() {
                 code.push_back(0x00); // R0
                 break;
             }
+            case OpCode::STORE_CONST: {
+                // STORE addr, const
+                uint16_t varAddress = allocateVar(instruction.result);
+                code.push_back(0x04); // STORE addr, const
+                code.push_back(varAddress >> 8); // addr high
+                code.push_back(varAddress & 0xFF); // addr low
+                code.push_back(uint8_t(std::stoi(instruction.arg1))); // const
+                break;
+            }
             case OpCode::IFLEQ: {
                 // LOAD R0, var1
-                code.push_back(0x02);
+                code.push_back(0x01);
                 code.push_back(0x00); // R0
                 uint16_t varAddress = allocateVar(instruction.arg1);
                 code.push_back(varAddress >> 8);
                 code.push_back(varAddress & 0xFF);
                 // LOAD R1, var2
-                code.push_back(0x02);
+                code.push_back(0x01);
                 code.push_back(0x01); // R1
                 varAddress = allocateVar(instruction.arg2);
                 code.push_back(varAddress >> 8);
@@ -264,9 +274,213 @@ void Codegen::writeToFile(std::string filename) {
     file << "; Code size: " << code.size() << " bytes" << std::endl;
     file << std::endl;
     
-    for (size_t i = 0; i < code.size(); i++) {
+    // Write IR instructions for debugging
+    file << "; IR Instructions:" << std::endl;
+    for (size_t i = 0; i < ir.size(); i++) {
+        const auto& instruction = ir[i];
+        std::string opStr;
+        switch (instruction.op) {
+            case OpCode::LOAD_CONST: opStr = "LOAD_CONST"; break;
+            case OpCode::LOAD_VAR: opStr = "LOAD_VAR"; break;
+            case OpCode::ADD: opStr = "ADD"; break;
+            case OpCode::SUB: opStr = "SUB"; break;
+            case OpCode::STORE: opStr = "STORE"; break;
+            case OpCode::IFLEQ: opStr = "IFLEQ"; break;
+            case OpCode::GOTO: opStr = "GOTO"; break;
+            case OpCode::LABEL: opStr = "LABEL"; break;
+            case OpCode::OUT: opStr = "OUT"; break;
+            case OpCode::HALT: opStr = "HALT"; break;
+        }
+        
+        file << "; IR[" << i << "]: " << opStr;
+        if (!instruction.arg1.empty()) file << " " << instruction.arg1;
+        if (!instruction.arg2.empty()) file << " " << instruction.arg2;
+        if (!instruction.result.empty()) file << " -> " << instruction.result;
+        file << std::endl;
+    }
+    file << std::endl;
+    
+    // Write machine code
+    file << "; Machine Code:" << std::endl;
+    size_t i = 0;
+    while (i < code.size()) {
         file << std::hex << std::setw(4) << std::setfill('0') << i << ": ";
-        file << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(code[i]) << std::endl;
+        
+        uint8_t opcode = code[i];
+        
+        // Add instruction name and opcode as comment
+        std::string instruction_name;
+        std::string opcode_desc;
+        
+        switch (opcode) {
+            case 0x00:
+                instruction_name = "HALT";
+                opcode_desc = "HALT";
+                break;
+            case 0x01:
+                instruction_name = "LOAD_VAR";
+                opcode_desc = "LOAD Rd, addr";
+                break;
+            case 0x02:
+                instruction_name = "LOAD_CONST";
+                opcode_desc = "LOAD Rd, const";
+                break;
+            case 0x03:
+                instruction_name = "STORE";
+                opcode_desc = "STORE addr, Rs";
+                break;
+            case 0x04:
+                instruction_name = "STORE_CONST";
+                opcode_desc = "STORE addr, const";
+                break;
+            case 0x05:
+                instruction_name = "ADD";
+                opcode_desc = "ADD Rd, Rs";
+                break;
+            case 0x06:
+                instruction_name = "SUB";
+                opcode_desc = "SUB Rd, Rs";
+                break;
+            case 0x07:
+                instruction_name = "JNZ";
+                opcode_desc = "JNZ Rd, addr";
+                break;
+            default:
+                instruction_name = "UNKNOWN";
+                opcode_desc = "Unknown opcode";
+                break;
+        }
+        
+        // Print all bytes of the instruction
+        file << "0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(opcode);
+        
+        // Add operand information for multi-byte instructions
+        if (opcode == 0x01 || opcode == 0x02) { // LOAD_VAR, LOAD_CONST
+            if (i + 1 < code.size()) {
+                uint8_t rd = code[i + 1];
+                file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(rd);
+                if (opcode == 0x01 && i + 3 < code.size()) { // LOAD_VAR with address
+                    uint8_t addr_high = code[i + 2];
+                    uint8_t addr_low = code[i + 3];
+                    file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_high);
+                    file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_low);
+                } else if (opcode == 0x02 && i + 2 < code.size()) { // LOAD_CONST with constant
+                    uint8_t const_val = code[i + 2];
+                    file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(const_val);
+                }
+            }
+        } else if (opcode == 0x03) { // STORE
+            if (i + 3 < code.size()) {
+                uint8_t addr_high = code[i + 1];
+                uint8_t addr_low = code[i + 2];
+                uint8_t rs = code[i + 3];
+                file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_high);
+                file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_low);
+                file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(rs);
+            }
+        } else if (opcode == 0x04) { // STORE_CONST
+            if (i + 3 < code.size()) {
+                uint8_t addr_high = code[i + 1];
+                uint8_t addr_low = code[i + 2];
+                uint8_t const_val = code[i + 3];
+                file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_high);
+                file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_low);
+                file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(const_val);
+            }
+        } else if (opcode == 0x05 || opcode == 0x06) { // ADD, SUB
+            if (i + 2 < code.size()) {
+                uint8_t rd = code[i + 1];
+                uint8_t rs = code[i + 2];
+                file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(rd);
+                file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(rs);
+            }
+        } else if (opcode == 0x07) { // JNZ
+            if (i + 1 < code.size()) {
+                uint8_t rd = code[i + 1];
+                file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(rd);
+                if (i + 3 < code.size()) {
+                    uint8_t addr_high = code[i + 2];
+                    uint8_t addr_low = code[i + 3];
+                    file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_high);
+                    file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_low);
+                }
+            }
+        }
+        
+        file << " ; " << instruction_name << " (" << opcode_desc << ")";
+        
+        // Add operand details to the comment
+        if (opcode == 0x01 || opcode == 0x02) { // LOAD_VAR, LOAD_CONST
+            if (i + 1 < code.size()) {
+                uint8_t rd = code[i + 1];
+                file << " R" << static_cast<int>(rd);
+                if (opcode == 0x01 && i + 3 < code.size()) { // LOAD_VAR with address
+                    uint16_t addr = (code[i + 2] << 8) | code[i + 3];
+                    file << ", 0x" << std::hex << std::setw(4) << std::setfill('0') << addr;
+                } else if (opcode == 0x02 && i + 2 < code.size()) { // LOAD_CONST with constant
+                    uint8_t const_val = code[i + 2];
+                    file << ", " << static_cast<int>(const_val);
+                }
+            }
+        } else if (opcode == 0x03) { // STORE
+            if (i + 3 < code.size()) {
+                uint16_t addr = (code[i + 1] << 8) | code[i + 2];
+                uint8_t rs = code[i + 3];
+                file << " 0x" << std::hex << std::setw(4) << std::setfill('0') << addr << ", R" << static_cast<int>(rs);
+            }
+        } else if (opcode == 0x04) { // STORE_CONST
+            if (i + 3 < code.size()) {
+                uint16_t addr = (code[i + 1] << 8) | code[i + 2];
+                uint8_t const_val = code[i + 3];
+                file << " 0x" << std::hex << std::setw(4) << std::setfill('0') << addr << ", " << static_cast<int>(const_val);
+            }
+        } else if (opcode == 0x05 || opcode == 0x06) { // ADD, SUB
+            if (i + 2 < code.size()) {
+                uint8_t rd = code[i + 1];
+                uint8_t rs = code[i + 2];
+                file << " R" << static_cast<int>(rd) << ", R" << static_cast<int>(rs);
+            }
+        } else if (opcode == 0x07) { // JNZ
+            if (i + 1 < code.size()) {
+                uint8_t rd = code[i + 1];
+                file << " R" << static_cast<int>(rd);
+                if (i + 3 < code.size()) {
+                    uint16_t addr = (code[i + 2] << 8) | code[i + 3];
+                    file << ", 0x" << std::hex << std::setw(4) << std::setfill('0') << addr;
+                }
+            }
+        }
+        
+        file << std::endl;
+        
+        // Advance to next instruction based on opcode
+        switch (opcode) {
+            case 0x00: // HALT
+                i += 1;
+                break;
+            case 0x01: // LOAD_VAR
+                i += 4; // opcode + rd + addr_high + addr_low
+                break;
+            case 0x02: // LOAD_CONST
+                i += 3; // opcode + rd + const
+                break;
+            case 0x03: // STORE
+                i += 4; // opcode + addr_high + addr_low + rs
+                break;
+            case 0x04: // STORE_CONST
+                i += 4; // opcode + addr_high + addr_low + const
+                break;
+            case 0x05: // ADD
+            case 0x06: // SUB
+                i += 3; // opcode + rd + rs
+                break;
+            case 0x07: // JNZ
+                i += 4; // opcode + rd + addr_high + addr_low
+                break;
+            default:
+                i += 1; // Unknown opcode, advance by 1
+                break;
+        }
     }
     
     file.close();

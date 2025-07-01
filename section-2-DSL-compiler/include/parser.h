@@ -8,7 +8,7 @@
 enum class OpCode{
     LOAD_CONST, LOAD_VAR,
     ADD, SUB,
-    STORE, IFLEQ, GOTO,
+    STORE, STORE_CONST, IFLEQ, GOTO,
     LABEL, OUT, HALT
 };
 

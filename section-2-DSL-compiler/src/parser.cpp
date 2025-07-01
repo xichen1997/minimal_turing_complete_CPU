@@ -35,10 +35,10 @@ Token Parser::expect(TokenType type){
 std::string Parser::parseTerm() {
     std::string temp = genTempVar();
     if (currentToken.type == TokenType::NUMBER) {
-        ir.push_back(IR{OpCode::LOAD_CONST, currentToken.value, "", temp});
+        ir.push_back(IR{OpCode::STORE_CONST, currentToken.value, "", temp});
         advance();
     } else if (currentToken.type == TokenType::ID) {
-        ir.push_back(IR{OpCode::LOAD_VAR, currentToken.value, "", temp});
+        ir.push_back(IR{OpCode::STORE, currentToken.value, "", temp});
         advance();
     } else {
         throw std::runtime_error("Expected identifier or number in expression at line " +
