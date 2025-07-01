@@ -253,6 +253,7 @@ void Parser::printIR() {
             case OpCode::ADD: opStr = "ADD"; break;
             case OpCode::SUB: opStr = "SUB"; break;
             case OpCode::STORE: opStr = "STORE"; break;
+            case OpCode::STORE_CONST: opStr = "STORE_CONST"; break;
             case OpCode::IFLEQ: opStr = "IFLEQ"; break;
             case OpCode::GOTO: opStr = "GOTO"; break;
             case OpCode::LABEL: opStr = "LABEL"; break;
@@ -261,6 +262,8 @@ void Parser::printIR() {
         }
         
         if (instruction.op == OpCode::STORE) {
+            std::cout << opStr << " " << instruction.arg1 << " -> " << instruction.result << std::endl;
+        } else if (instruction.op == OpCode::STORE_CONST) {
             std::cout << opStr << " " << instruction.arg1 << " -> " << instruction.result << std::endl;
         } else if (instruction.op == OpCode::LOAD_CONST || instruction.op == OpCode::LOAD_VAR) {
             std::cout << opStr << " " << instruction.arg1 << " -> " << instruction.result << std::endl;

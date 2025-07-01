@@ -133,7 +133,7 @@ bool compareIR(const std::string& program, const std::vector<std::string>& expec
 bool testLetStatement() {
     std::string program = "let x = 5;";
     std::vector<std::string> expected = {
-        "LOAD_CONST 5 -> __temp__0",
+        "STORE_CONST 5 -> __temp__0",
         "STORE __temp__0 -> x"
     };
     return compareIR(program, expected);
@@ -142,8 +142,8 @@ bool testLetStatement() {
 bool testLetStatementWithExpression() {
     std::string program = "let y = 3 + 7;";
     std::vector<std::string> expected = {
-        "LOAD_CONST 3 -> __temp__0",
-        "LOAD_CONST 7 -> __temp__1",
+        "STORE_CONST 3 -> __temp__0",
+        "STORE_CONST 7 -> __temp__1",
         "ADD __temp__0 __temp__1 -> __temp__2",
         "STORE __temp__2 -> y"
     };
@@ -153,7 +153,7 @@ bool testLetStatementWithExpression() {
 bool testAssignmentStatement() {
     std::string program = "x = 10;";
     std::vector<std::string> expected = {
-        "LOAD_CONST 10 -> __temp__0",
+        "STORE_CONST 10 -> __temp__0",
         "STORE __temp__0 -> x"
     };
     return compareIR(program, expected);
@@ -162,8 +162,8 @@ bool testAssignmentStatement() {
 bool testAssignmentWithExpression() {
     std::string program = "y = x + 5;";
     std::vector<std::string> expected = {
-        "LOAD_VAR x -> __temp__0",
-        "LOAD_CONST 5 -> __temp__1",
+        "STORE x -> __temp__0",
+        "STORE_CONST 5 -> __temp__1",
         "ADD __temp__0 __temp__1 -> __temp__2",
         "STORE __temp__2 -> y"
     };
@@ -213,10 +213,10 @@ bool testHaltStatement() {
 bool testComplexExpression() {
     std::string program = "let result = a + b - 3;";
     std::vector<std::string> expected = {
-        "LOAD_VAR a -> __temp__0",
-        "LOAD_VAR b -> __temp__1",
+        "STORE a -> __temp__0",
+        "STORE b -> __temp__1",
         "ADD __temp__0 __temp__1 -> __temp__2",
-        "LOAD_CONST 3 -> __temp__3",
+        "STORE_CONST 3 -> __temp__3",
         "SUB __temp__2 __temp__3 -> __temp__4",
         "STORE __temp__4 -> result"
     };
@@ -233,9 +233,9 @@ bool testMultipleStatements() {
         halt;
     )";
     std::vector<std::string> expected = {
-        "LOAD_CONST 5 -> __temp__0",
+        "STORE_CONST 5 -> __temp__0",
         "STORE __temp__0 -> x",
-        "LOAD_CONST 10 -> __temp__1",
+        "STORE_CONST 10 -> __temp__1",
         "STORE __temp__1 -> y",
         "OUT x",
         "IFLEQ x y loop",
@@ -255,11 +255,11 @@ bool testSimpleLoop() {
         halt;
     )";
     std::vector<std::string> expected = {
-        "LOAD_CONST 0 -> __temp__0",
+        "STORE_CONST 0 -> __temp__0",
         "STORE __temp__0 -> counter",
         "LABEL loop",
-        "LOAD_VAR counter -> __temp__1",
-        "LOAD_CONST 1 -> __temp__2",
+        "STORE counter -> __temp__1",
+        "STORE_CONST 1 -> __temp__2",
         "ADD __temp__1 __temp__2 -> __temp__3",
         "STORE __temp__3 -> counter",
         "IFLEQ counter 5 loop",
