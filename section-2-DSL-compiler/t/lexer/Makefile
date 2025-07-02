@@ -35,10 +35,6 @@ test: $(LEXER_TEST)
 	@echo ""
 
 
-# Run both tests
-check: test 
-
-
 # Build everything
 build: $(LEXER_TEST) 
 
@@ -52,12 +48,10 @@ help:
 	@echo "Available targets:"
 	@echo "  all           - Run comprehensive tests (default)"
 	@echo "  test          - Run the comprehensive test suite"
-	@echo "  check         - Run test"
 	@echo "  build         - Build all executables"
 	@echo "  clean         - Remove build artifacts"
 	@echo "  help          - Show this help message"
 	@echo ""
-	@echo "Test files:"
 
 # Phony targets
-.PHONY: all test check build clean help 
+.PHONY: all test build clean help 
