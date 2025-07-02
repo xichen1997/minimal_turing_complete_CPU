@@ -70,8 +70,11 @@ public:
                 case 0x06: { // SUB Rd, Rs
                     uint8_t rd = fetch();
                     uint8_t rs = fetch();
+                    uint8_t original_rd = R[rd];
                     R[rd] -= R[rs];
-                    DEBUG_PRINT("SUB Rd: " << std::hex << static_cast<int>(rd) << " Rs: " << std::hex << static_cast<int>(rs) << " result: " << std::hex << static_cast<int>(R[rd]));
+                    // Set R2 as carry register: 1 if underflow occurred (Rd < Rs), 0 otherwise
+                    R[2] = (original_rd < R[rs]) ? 1 : 0;
+                    DEBUG_PRINT("SUB Rd: " << std::hex << static_cast<int>(rd) << " Rs: " << std::hex << static_cast<int>(rs) << " result: " << std::hex << static_cast<int>(R[rd]) << " carry: " << std::hex << static_cast<int>(R[2]));
                     break;
                 }
                 case 0x07: { // JNZ Rd, addr

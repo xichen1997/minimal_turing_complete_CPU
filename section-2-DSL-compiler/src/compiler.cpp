@@ -19,7 +19,6 @@ int main(int argc, char* argv[]) {
 
     std::string inputFile = argv[1];
     Codegen codegen(inputFile);
-    codegen.generateCode();
     codegen.writeToHex("output.bin", "output.hex");
     codegen.writeToFile("output.asm");
     std::cout << "Compiler completed!" << std::endl;

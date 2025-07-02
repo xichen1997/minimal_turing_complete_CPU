@@ -28,7 +28,7 @@ class Codegen {
         std::vector<uint8_t> code; // code vector
         std::vector<uint8_t> data; // data vector
         static uint16_t DATA_CURSOR; // current data cursor
-        static const uint16_t CODE_START = 0x0100; // start of code
+        static const uint16_t CODE_START = 0x0000; // start of code
         static const uint16_t CODE_END = 0x7FFF; // end of code
         static const uint16_t DATA_START = 0x8000; // start of data
         static const uint16_t DATA_END = 0xFF00; // end of data, output register is at 0xFF00

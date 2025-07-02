@@ -101,12 +101,13 @@ void Codegen::generateCode() {
                 code.push_back(varAddress & 0xFF);
                 break;
             }
-            case OpCode::LOAD_CONST:
+            case OpCode::LOAD_CONST:{
                 // LOAD_CONST R0, const
                 code.push_back(0x02);
                 code.push_back(0x00); // R0
                 code.push_back(uint8_t(std::stoi(instruction.arg1))); // const
                 break;
+            }
             case OpCode::STORE: {
                 // STORE addr1, addr2 store the value of addr2 to addr1
                 uint16_t addr1 = allocateVar(instruction.result);
@@ -196,29 +197,18 @@ void Codegen::generateCode() {
                 varAddress = allocateVar(instruction.arg2);
                 code.push_back(varAddress >> 8);
                 code.push_back(varAddress & 0xFF);
-                // SUB R0, R1
+                // SUB R1, R0
                 code.push_back(0x06); // SUB Rd, Rs
-                code.push_back(0x00); // Rd
-                code.push_back(0x01); // Rs
-                // JNZ R0, skip (jump over GOTO if result ≠ 0 and a > b)
-                code.push_back(0x07);
-                code.push_back(0x00);  // R0
-                uint16_t skipLabelAddr = code.size();
+                code.push_back(0x01); // Rd Var2
+                code.push_back(0x00); // Rs Var1
+                
+                // JZ R2, skip (jump to label if a <= b)
+                code.push_back(0x08);
+                code.push_back(0x02); // R2
+                size_t patchPos = code.size();
                 code.push_back(0x00);
                 code.push_back(0x00);
-                std::string skipLabel = "__ifleq_skip__" + std::to_string(pendingPatches.size());
-                pendingPatches.push_back(Patch{skipLabelAddr, skipLabel});
-
-                // GOTO label (jump over skipLabel if result ≠ 0 and a > b)
-                code.push_back(0x07); // JNZ Rd, addr
-                code.push_back(0x03); // Rd
-                uint16_t labelAddress = code.size();
-                code.push_back(0x00);
-                code.push_back(0x00);
-                pendingPatches.push_back(Patch{labelAddress, instruction.result});
-
-                // LABEL skipLabel
-                labelMap[skipLabel] = code.size();
+                pendingPatches.push_back(Patch{patchPos, instruction.result});
                 break;
             }
             case OpCode::LABEL: {
@@ -234,18 +224,27 @@ void Codegen::generateCode() {
                 size_t patchPos = code.size();
                 code.push_back(0x00);       // placeholder high byte
                 code.push_back(0x00);       // placeholder low byte
-
                 pendingPatches.push_back(Patch{patchPos, instruction.result});
                 break;
             }
         }
     }
     // backpatching
+    std::cout << "Backpatching..." << std::endl;
+    std::cout << "Label map:" << std::endl;
+    for (const auto& label : labelMap) {
+        std::cout << "  " << label.first << " -> 0x" << std::hex << label.second << std::endl;
+    }
+    std::cout << "Pending patches:" << std::endl;
     for (const auto& patch : pendingPatches) {
+        std::cout << "  " << patch.labelName << " at position " << patch.addrPos << std::endl;
         if (labelMap.find(patch.labelName) != labelMap.end()) {
             uint16_t labelAddress = labelMap[patch.labelName];
+            std::cout << "    Patching with address 0x" << std::hex << labelAddress << std::endl;
             code[patch.addrPos] = labelAddress >> 8;
             code[patch.addrPos + 1] = labelAddress & 0xFF;
+        } else {
+            std::cout << "    Label not found!" << std::endl;
         }
     }
     // write the code to the file
@@ -290,6 +289,8 @@ void Codegen::writeToFile(std::string filename) {
             case OpCode::LABEL: opStr = "LABEL"; break;
             case OpCode::OUT: opStr = "OUT"; break;
             case OpCode::HALT: opStr = "HALT"; break;
+            case OpCode::STORE_CONST: opStr = "STORE_CONST"; break;
+            default: opStr = "UNKNOWN"; break;
         }
         
         file << "; IR[" << i << "]: " << opStr;
@@ -344,6 +345,10 @@ void Codegen::writeToFile(std::string filename) {
             case 0x07:
                 instruction_name = "JNZ";
                 opcode_desc = "JNZ Rd, addr";
+                break;
+            case 0x08:
+                instruction_name = "JZ";
+                opcode_desc = "JZ Rd, addr";
                 break;
             default:
                 instruction_name = "UNKNOWN";
@@ -405,6 +410,17 @@ void Codegen::writeToFile(std::string filename) {
                     file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_low);
                 }
             }
+        } else if (opcode == 0x08) { // JZ
+            if (i + 1 < code.size()) {
+                uint8_t rd = code[i + 1];
+                file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(rd);
+                if (i + 3 < code.size()) {
+                    uint8_t addr_high = code[i + 2];
+                    uint8_t addr_low = code[i + 3];
+                    file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_high);
+                    file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_low);
+                }
+            }
         }
         
         file << " ; " << instruction_name << " (" << opcode_desc << ")";
@@ -449,7 +465,18 @@ void Codegen::writeToFile(std::string filename) {
                     file << ", 0x" << std::hex << std::setw(4) << std::setfill('0') << addr;
                 }
             }
-        }
+        } else if (opcode == 0x08) { // JZ
+            if (i + 1 < code.size()) {
+                uint8_t rd = code[i + 1];
+                file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(rd);
+                if (i + 3 < code.size()) {
+                    uint8_t addr_high = code[i + 2];
+                    uint8_t addr_low = code[i + 3];
+                    file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_high);
+                    file << " 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(addr_low);
+                }
+            }
+        }   
         
         file << std::endl;
         
@@ -475,6 +502,9 @@ void Codegen::writeToFile(std::string filename) {
                 i += 3; // opcode + rd + rs
                 break;
             case 0x07: // JNZ
+                i += 4; // opcode + rd + addr_high + addr_low
+                break;
+            case 0x08: // JZ
                 i += 4; // opcode + rd + addr_high + addr_low
                 break;
             default:
