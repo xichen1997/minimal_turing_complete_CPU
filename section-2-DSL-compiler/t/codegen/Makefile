@@ -13,13 +13,15 @@ BUILD_DIR = build
 CODEGEN_TEST = $(BUILD_DIR)/test_codegen
 BUILD_TARGET = $(BUILD_DIR)/test_codegen
 
-# create build directory
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+all: test
 
 # build the test file
 $(CODEGEN_TEST): $(SRC_DIR)/codegen.cpp $(SRC_DIR)/parser.cpp $(SRC_DIR)/lexer.cpp $(TEST_DIR)/test_codegen.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(SRC_DIR)/codegen.cpp $(SRC_DIR)/parser.cpp $(SRC_DIR)/lexer.cpp $(TEST_DIR)/test_codegen.cpp -o $(CODEGEN_TEST)
+
+# create build directory
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
 # run the test file
 test: $(CODEGEN_TEST)

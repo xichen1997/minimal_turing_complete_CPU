@@ -12,16 +12,16 @@ CXX = g++
 CXXFLAGS = -std=c++11 -Wall -Wextra -g
 INCLUDES = -Iinclude
 
-# make the build directory
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
-
 # compile the compiler
 compiler: $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(BUILD_DIR)/compiler src/compiler.cpp src/codegen.cpp src/parser.cpp src/lexer.cpp
 
+# make the build directory
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
 # test all targets
-test_all: 
+test: 
 	@echo "Building and testing DSL compiler..."
 	@echo "=== Testing Lexer ==="
 	$(MAKE) -C $(LEXER_TEST_DIR) 
@@ -32,9 +32,6 @@ test_all:
 	@echo "=== Testing Codegen ==="
 	$(MAKE) -C $(CODEGEN_TEST_DIR) test
 	@echo "All tests completed!"
-
-# Run tests
-test: test_all
 
 # Clean
 clean:
@@ -48,9 +45,9 @@ clean:
 # Help
 help:
 	@echo "Simple DSL Compiler Makefile:"
-	@echo "  make compiler  - Build the main compiler executable"
 	@echo "  make test      - Build and run all tests (lexer + parser + codegen)"
 	@echo "  make clean     - Clean build files"
 	@echo "  make help      - Show this help"
+	@echo "  make compiler  - Build the main compiler executable"
 
 .PHONY: test clean help 

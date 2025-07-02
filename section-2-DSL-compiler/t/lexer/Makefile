@@ -12,9 +12,6 @@ TEST_DIR = .
 BUILD_DIR = build
 
 # Source files
-LEXER_SRC = $(SRC_DIR)/lexer.cpp
-PARSER_SRC = $(SRC_DIR)/parser.cpp
-TEST_SRC = $(TEST_DIR)/test_lexer.cpp
 
 # Executables
 LEXER_TEST = $(BUILD_DIR)/test_lexer
@@ -23,13 +20,13 @@ LEXER_TEST = $(BUILD_DIR)/test_lexer
 # Default target
 all: test
 
+# Build the comprehensive test suite
+$(LEXER_TEST): $(SRC_DIR)/lexer.cpp $(TEST_DIR)/test_lexer.cpp | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(SRC_DIR)/lexer.cpp $(TEST_DIR)/test_lexer.cpp -o $(LEXER_TEST)
+
 # Create build directory
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
-
-# Build the comprehensive test suite
-$(LEXER_TEST): $(LEXER_SRC) $(TEST_SRC) | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LEXER_SRC) $(TEST_SRC) -o $(LEXER_TEST)
 
 # Run the comprehensive test suite
 test: $(LEXER_TEST)

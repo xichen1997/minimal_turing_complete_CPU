@@ -13,6 +13,8 @@ BUILD_DIR = build
 PARSER_TEST = $(BUILD_DIR)/test_parser
 BUILD_TARGET = $(BUILD_DIR)/test_parser
 
+
+all: test
 # create build directory
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -20,6 +22,7 @@ $(BUILD_DIR):
 # build the test file
 $(PARSER_TEST): $(SRC_DIR)/parser.cpp $(SRC_DIR)/lexer.cpp $(TEST_DIR)/test_parser.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(SRC_DIR)/parser.cpp $(SRC_DIR)/lexer.cpp $(TEST_DIR)/test_parser.cpp -o $(PARSER_TEST)
+
 # run the test file
 test: $(PARSER_TEST)
 	@echo "Running parser test..."
