@@ -5,7 +5,17 @@
   Tokenizes the input DSL program into a stream of tokens (keywords, identifiers, numbers, operators, etc.).
 
 - **Parser**:  
-  Consumes the token stream and builds an intermediate representation (IR) of the program, suitable for execution or further compilation.
+  Consumes the token stream and builds an intermediate representation (IR) of the program, suitable for execution or further compilation. Use linear scanning and memory write back method to keep the generation simpler, but will generate more redundant code:
+
+  For example:
+  ```
+  let a = 1 + 2;
+  ```
+  will be parsed into:
+  ```
+  1 + 2 -> __temp__0
+  __temp__0 -> a
+  ```
 
 - **Intermediate Representation (IR)**:  
   The IR is a vector of instructions, each corresponding to a CPU operation (e.g., `LOAD_CONST`, `ADD`, `STORE`, `IFLEQ`, `GOTO`, `LABEL`, `OUT`, `HALT`).
@@ -21,7 +31,6 @@
 
 ```sh
 cd section-2-DSL-compiler/t/parser
-make clean
 make test
 ```
 
@@ -29,7 +38,13 @@ make test
 
 ```sh
 cd section-2-DSL-compiler/t/lexer
-make clean
+make test
+```
+
+### Build and Run Codegen Tests
+
+```sh
+cd section-2-DSL-compiler/t/codegen
 make test
 ```
 

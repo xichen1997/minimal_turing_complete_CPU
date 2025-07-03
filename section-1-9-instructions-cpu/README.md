@@ -57,11 +57,18 @@ The program shows how to:
 To build the project:
 ```bash
 make
+make debug
+```
+make debug to get DEBUG output and the each step printing.
+
+To run the cpu test program:
+```bash
+./build/test
 ```
 
-To run the program:
+To run the program(generated from section 2):
 ```bash
-./cpu
+./bulid/cpu build/output.hex 
 ```
 
 To clean build artifacts:
