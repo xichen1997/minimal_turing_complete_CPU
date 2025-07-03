@@ -5,16 +5,17 @@
   Tokenizes the input DSL program into a stream of tokens (keywords, identifiers, numbers, operators, etc.).
 
 - **Parser**:  
-  Consumes the token stream and builds an intermediate representation (IR) of the program, suitable for execution or further compilation. Use linear scanning and memory write back method to keep the generation simpler, but will generate more redundant code:
+  Consumes the token stream and builds an intermediate representation (IR) of the program, suitable for execution or further compilation. Use linear scanning and memory write back method to keep the generation simpler, but will generate more code:
 
   For example:
   ```
-  let a = 1 + 2;
+  let a = 1 + 2 + 3;
   ```
   will be parsed into:
   ```
   1 + 2 -> __temp__0
-  __temp__0 -> a
+  __temp0__ + 3 -> __temp1__ 
+  __temp1 -> a
   ```
 
 - **Intermediate Representation (IR)**:  
