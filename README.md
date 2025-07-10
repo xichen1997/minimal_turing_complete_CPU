@@ -273,12 +273,8 @@ make
 - ✅ Complete compilation pipeline
 
 ### Future Enhancements
-- 🔄 Assembler with macro support
-- 🔄 Runtime environment with I/O
-- 🔄 Optimizing compiler
-- 🔄 Extended instruction set
-- 🔄 Memory management
-- 🔄 Interrupt handling
+- REPL
+- OS support 
 
 ## Technical Specifications
 
