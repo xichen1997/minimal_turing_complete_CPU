@@ -56,7 +56,7 @@ int Parser::getPrecedence(TokenType op) {
             return 1;
         case TokenType::OP_BRACKET_LEFT:
         case TokenType::OP_BRACKET_RIGHT:
-            return 0;  // RIGHT BRACKET don't participate in precedence comparison because it should never show up in the getprecedence function.
+            return 0; 
         default:
             return 0;
     }
