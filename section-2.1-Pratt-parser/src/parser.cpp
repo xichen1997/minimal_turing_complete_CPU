@@ -83,18 +83,6 @@ std::string Parser::parsePrefixExpr() {
     return temp;
 }
 
-std::string Parser::parsePostfixExpr() {
-    std::string temp = genTempVar();
-    if(currentToken.type == TokenType::NUMBER) {
-        ir.push_back(IR{OpCode::STORE_CONST, currentToken.value, "", temp});
-        advance();
-    } else if(currentToken.type == TokenType::ID) {
-        ir.push_back(IR{OpCode::STORE, currentToken.value, "", temp});
-        advance();
-    }
-    return temp;
-}
-
 // Pratt parser for expression parsing
 std::string Parser::parseExpr(int precedence) {
     // Parse the left-hand side first
