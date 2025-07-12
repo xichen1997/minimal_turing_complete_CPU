@@ -151,8 +151,6 @@ void IRInterpreter::execute(const std::vector<IR>& ir) {
 
 ## Building and Running
 
-
-
 ### Build
 ```bash
 make
