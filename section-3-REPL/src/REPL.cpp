@@ -6,6 +6,12 @@
 
 #include "interpreter.h"
 
+#ifdef DEBUG
+#define DEBUG_PRINT(x) do { x; } while (0)
+#else
+#define DEBUG_PRINT(x) do {} while (0)
+#endif
+
 std::vector<IR> loadedProgram;
 std::unordered_map<std::string, size_t> labelMap;
 IRInterpreter *interpreterScript = nullptr;
@@ -43,20 +49,40 @@ void handleCommand(const std::string& command) {
         file.close();
         Lexer lexer(allCode);
         Parser parser(lexer);
-        parser.parseStatement();
+        parser.parseProgram();
         loadedProgram = parser.getIR();
         for(size_t i = 0; i < loadedProgram.size(); i++){
             if(loadedProgram[i].op == OpCode::LABEL){
                 labelMap[loadedProgram[i].arg1] = i;
             }
         }
-        std::cout << "File loaded successfully: " << filename << std::endl;
+        DEBUG_PRINT(std::cout << "size of loaded program: " << loadedProgram.size() << std::endl;);
+        DEBUG_PRINT(std::cout << "Generated IR instructions:" << std::endl;);
+        for(size_t i = 0; i < loadedProgram.size(); i++){
+            const auto& inst = loadedProgram[i];
+            DEBUG_PRINT(std::cout << i << ": ");
+            switch(inst.op) {
+                case OpCode::LOAD_CONST: DEBUG_PRINT(std::cout << "LOAD_CONST " << inst.arg1 << " -> " << inst.result << std::endl;); break;
+                case OpCode::LOAD_VAR: DEBUG_PRINT(std::cout << "LOAD_VAR " << inst.arg1 << " -> " << inst.result << std::endl;); break;
+                case OpCode::ADD: DEBUG_PRINT(std::cout << "ADD " << inst.arg1 << " + " << inst.arg2 << " -> " << inst.result << std::endl;); break;
+                case OpCode::SUB: DEBUG_PRINT(std::cout << "SUB " << inst.arg1 << " - " << inst.arg2 << " -> " << inst.result << std::endl;); break;
+                case OpCode::STORE: DEBUG_PRINT(std::cout << "STORE " << inst.arg1 << " -> " << inst.result << std::endl;); break;
+                case OpCode::STORE_CONST: DEBUG_PRINT(std::cout << "STORE_CONST " << inst.arg1 << " -> " << inst.result << std::endl;); break;
+                case OpCode::OUT: DEBUG_PRINT(std::cout << "OUT " << inst.arg1 << std::endl;); break;
+                case OpCode::HALT: DEBUG_PRINT(std::cout << "HALT" << std::endl;); break;
+                case OpCode::LABEL: DEBUG_PRINT(std::cout << "LABEL " << inst.arg1 << std::endl;); break;
+                case OpCode::GOTO: DEBUG_PRINT(std::cout << "GOTO " << inst.arg1 << std::endl;); break;
+                case OpCode::IFLEQ: DEBUG_PRINT(std::cout << "IFLEQ " << inst.arg1 << " <= " << inst.arg2 << " -> " << inst.result << std::endl;); break;
+            }
+        }
+        DEBUG_PRINT(std::cout << "File loaded successfully: " << filename << std::endl;);
     }else if(cmd == ".run"){
         interpreterScript = new IRInterpreter(); // create a new interpreter for the script, which is safer than using the shell interpreter.
         if(loadedProgram.empty()){
             std::cout << "Error: No file loaded, please use .load to load a file first." << std::endl;
             return;
         }
+        DEBUG_PRINT(std::cout << "size of loaded program: " << loadedProgram.size() << std::endl;);
         interpreterScript->execute(loadedProgram, labelMap);
         delete interpreterScript;
         interpreterScript = nullptr;
@@ -92,7 +118,7 @@ int main() {
                     throw std::runtime_error("Control flow instructions not supported in REPL mode");
                 }
             }
-
+            DEBUG_PRINT(std::cout << "IR size: " << ir.size() << std::endl;);
             // execute the IR
             interpreter.execute(ir); 
         } catch (const std::exception& ex) {

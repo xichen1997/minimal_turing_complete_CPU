@@ -1,2 +1,2 @@
-let a = 10;
+let a = 10 + 2;
 out a;

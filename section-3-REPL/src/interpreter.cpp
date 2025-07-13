@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 
-void IRInterpreter::execute(const IR& inst){
+void IRInterpreter::executeSingleInstruction(const IR& inst){
     if (inst.op == OpCode::LOAD_CONST) {
         variables[inst.result] = std::stoi(inst.arg1);
     } else if (inst.op == OpCode::LOAD_VAR) {
@@ -42,11 +42,7 @@ void IRInterpreter::execute(const IR& inst){
         throw std::runtime_error("HALT instruction executed");
     } else if (inst.op == OpCode::LABEL) {
         return;
-    } else if (inst.op == OpCode::GOTO) {
-        return;
-    } else if (inst.op == OpCode::IFLEQ) {
-        return;
-    } 
+    }
     return;
 }
 
@@ -107,7 +103,7 @@ void IRInterpreter::execute(const std::vector<IR>& ir, const std::unordered_map<
                 pc = labelMap.at(inst.result);
             }
         }else{
-            execute(inst);
+            executeSingleInstruction(inst);
         }
         pc++;
     }

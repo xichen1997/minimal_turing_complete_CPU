@@ -7,7 +7,7 @@
 
 class IRInterpreter {
     public:
-        void execute(const IR& inst);
+        void executeSingleInstruction(const IR& inst);
         void execute(const std::vector<IR>& ir);
         void execute(const std::vector<IR>& ir, const std::unordered_map<std::string, size_t>& labelMap);
     private:
