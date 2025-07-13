@@ -95,7 +95,7 @@ void handleCommand(const std::string& command) {
 int main() {
     IRInterpreter interpreter;
 
-    std::cout << "MiniOS REPL v0.1\nType .exit to quit.\n";
+    std::cout << "MiniREPL v0.1\nType .exit to quit.\n";
 
     while (true) {
         std::cout << ">>> ";
