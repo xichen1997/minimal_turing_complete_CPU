@@ -39,7 +39,7 @@ void IRInterpreter::executeSingleInstruction(const IR& inst){
         }
         std::cout << variables[inst.arg1] << std::endl;
     } else if (inst.op == OpCode::HALT) {
-        throw std::runtime_error("HALT instruction executed");
+        return;
     } else if (inst.op == OpCode::LABEL) {
         return;
     }
@@ -99,7 +99,22 @@ void IRInterpreter::execute(const std::vector<IR>& ir, const std::unordered_map<
         if(inst.op == OpCode::GOTO){
             pc = labelMap.at(inst.arg1);
         }else if(inst.op == OpCode::IFLEQ){
-            if(variables[inst.arg1] <= variables[inst.arg2]){
+            int leftVal = variables[inst.arg1];
+            int rightVal;
+            // Check if arg2 is a variable or a constant
+            if(inst.arg2[0] == '-' || isdigit(inst.arg2[0])){
+                for(size_t i = 1; i < inst.arg2.size(); i++){
+                    if(!isdigit(inst.arg2[i])){
+                        throw std::runtime_error("Invalid constant: " + inst.arg2);
+                    }
+                }
+                rightVal = std::stoi(inst.arg2);
+            }else if(variables.find(inst.arg2) != variables.end()){
+                rightVal = variables[inst.arg2];
+            }else{
+                throw std::runtime_error("Undefined variable: " + inst.arg2);
+            }
+            if(leftVal <= rightVal){
                 pc = labelMap.at(inst.result);
             }
         }else{

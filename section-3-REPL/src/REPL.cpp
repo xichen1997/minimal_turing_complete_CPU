@@ -53,8 +53,12 @@ void handleCommand(const std::string& command) {
         loadedProgram = parser.getIR();
         for(size_t i = 0; i < loadedProgram.size(); i++){
             if(loadedProgram[i].op == OpCode::LABEL){
-                labelMap[loadedProgram[i].arg1] = i;
+                labelMap[loadedProgram[i].result] = i;
             }
+        }
+        DEBUG_PRINT(std::cout << "Label map contents:" << std::endl;);
+        for(const auto& label : labelMap) {
+            DEBUG_PRINT(std::cout << "  " << label.first << " -> " << label.second << std::endl;);
         }
         DEBUG_PRINT(std::cout << "size of loaded program: " << loadedProgram.size() << std::endl;);
         DEBUG_PRINT(std::cout << "Generated IR instructions:" << std::endl;);
