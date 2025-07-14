@@ -26,7 +26,10 @@ void IRInterpreter::executeSingleInstruction(const IR& inst){
         if (variables.find(inst.arg2) == variables.end()) {
             throw std::runtime_error("Undefined variable: " + inst.arg2);
         }
+        int original_val = variables[inst.arg1];
         variables[inst.result] = variables[inst.arg1] - variables[inst.arg2];
+        // Set carry flag: 1 if underflow occurred (arg1 < arg2), 0 otherwise
+        variables["__carry__"] = (original_val < variables[inst.arg2]) ? 1 : 0;
     } else if (inst.op == OpCode::STORE) {
         if (variables.find(inst.arg1) == variables.end()) {
             throw std::runtime_error("Undefined variable: " + inst.arg1);
@@ -79,7 +82,10 @@ void IRInterpreter::execute(const std::vector<IR>& ir) {
             if (variables.find(inst.arg2) == variables.end()) {
                 throw std::runtime_error("Undefined variable: " + inst.arg2);
             }
+            int original_val = variables[inst.arg1];
             variables[inst.result] = variables[inst.arg1] - variables[inst.arg2];
+            // Set carry flag: 1 if underflow occurred (arg1 < arg2), 0 otherwise
+            variables["__carry__"] = (original_val < variables[inst.arg2]) ? 1 : 0;
         } else if (inst.op == OpCode::STORE) {
             if (variables.find(inst.arg1) == variables.end()) {
                 throw std::runtime_error("Undefined variable: " + inst.arg1);
