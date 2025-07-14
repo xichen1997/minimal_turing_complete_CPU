@@ -27,7 +27,13 @@ void handleCommand(const std::string& command) {
     }else if(cmd == ".clear") {
         system("clear");
     }else if (cmd == ".help") {
-        std::cout << "Available commands: .exit, .clear, .help" << std::endl;
+        std::cout << "Available commands: .exit, .clear, .help .runfromCPU" << std::endl;
+        std::cout << "Usage: .help to show this message" << std::endl;
+        std::cout << "Usage: .runfromCPU <filename> to run the program from the CPU" << std::endl;
+        std::cout << "Usage: .load <filename> to load the program from the file" << std::endl;
+        std::cout << "Usage: .run to run the program from the REPL" << std::endl;
+        std::cout << "Usage: .exit to exit the program" << std::endl;
+        std::cout << "Usage: .clear to clear the screen" << std::endl;
     }else if(cmd == ".load"){
         std::string filename;
         iss >> filename;  // Extract filename from the stream
