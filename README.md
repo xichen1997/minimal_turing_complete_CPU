@@ -41,6 +41,9 @@ This project implements a complete computer system from the ground up:
 minimal_turing_complete_CPU/
 ├── section-1-6-instructions-cpu/     # Basic CPU implementation
 ├── section-2-DSL-compiler/           # DSL compiler and code generation
+├── section-2.1-Pratt-parser/         # Advanced parser with operator precedence
+├── section-3-REPL/                   # Basic REPL (Read-Eval-Print Loop)
+├── section-3.1-REPL-input/           # REPL with input support
 └── README.md                         # This file
 ```
 
@@ -263,6 +266,155 @@ make
 ./build/cpu ../section-2-DSL-compiler/build/output.hex
 ```
 
+## REPL (Read-Eval-Print Loop)
+
+The project includes two REPL implementations that provide interactive programming environments for the DSL.
+
+### Section 3: Basic REPL
+
+A fundamental REPL implementation that supports interactive DSL programming without input operations.
+
+#### Features
+- **Interactive Programming**: Execute DSL statements line by line
+- **File Loading**: Load and execute complete programs from `.dsl` files
+- **Variable Persistence**: Variables persist across statements in the same session
+- **Error Handling**: Comprehensive error reporting with line/column information
+- **Debug Output**: Optional debug information for program analysis
+
+#### Commands
+```
+.exit          - Quit the REPL
+.clear         - Clear the screen
+.help          - Show available commands
+.load file.dsl - Load a program from file
+.run           - Execute the loaded program
+```
+
+#### Usage Example
+```bash
+cd section-3-REPL
+make
+./build/REPL
+
+>>> let x = 10;
+>>> let y = 20;
+>>> let result = x + y;
+>>> out result;
+30
+>>> .load demo.dsl
+>>> .run
+```
+
+### Section 3.1: REPL with Input Support
+
+An enhanced REPL that extends the basic functionality with user input capabilities.
+
+#### New Features
+- **Input Operations**: `in variable;` instruction for reading user input
+- **Interactive Programs**: Support for programs that require user interaction
+- **Input Validation**: Clear prompts and error handling for input operations
+- **Enhanced Debugging**: Improved debug output with input tracking
+
+#### Input Syntax
+```dsl
+let x = 0;
+in x;        // Read a number from user input
+out x;       // Display the value
+```
+
+#### Interactive Example
+```bash
+cd section-3.1-REPL-input
+make
+./build/REPL
+
+>>> let x = 0;
+>>> in x;
+Enter a number: 42
+>>> out x;
+42
+>>> .load interactive.dsl
+>>> .run
+Enter a number: 15
+15
+```
+
+#### Advanced Input Programs
+```dsl
+// Interactive calculator
+let a = 0;
+let b = 0;
+in a;
+in b;
+let result = a + b;
+out result;
+halt;
+```
+
+### REPL Architecture
+
+#### Core Components
+1. **Command Parser**: Handles REPL-specific commands (`.load`, `.run`, etc.)
+2. **Statement Parser**: Parses individual DSL statements
+3. **Interpreter**: Executes parsed statements immediately
+4. **Variable Manager**: Maintains variable state across statements
+5. **File Loader**: Loads and parses complete programs from files
+
+#### Execution Modes
+- **Interactive Mode**: Execute statements one at a time
+- **File Mode**: Load and execute complete programs
+- **Debug Mode**: Show detailed execution information
+
+#### Error Handling
+- **Syntax Errors**: Detailed error messages with line/column information
+- **Runtime Errors**: Graceful handling of execution errors
+- **File Errors**: Clear reporting of file loading issues
+- **Input Errors**: Validation and error handling for user input
+
+### REPL vs Compiler Comparison
+
+| Feature | REPL | Compiler |
+|---------|------|----------|
+| **Execution Speed** | Immediate interpretation | Compiled to machine code |
+| **Memory Usage** | Higher (interpreter overhead) | Lower (direct execution) |
+| **Development Speed** | Fast (no compilation step) | Slower (compile-run cycle) |
+| **Debugging** | Easy (step-by-step execution) | More complex (requires debugger) |
+| **Performance** | Slower (interpreted) | Faster (native execution) |
+| **Use Case** | Development, testing, learning | Production, performance-critical |
+
+### REPL Implementation Details
+
+#### Statement Processing
+```cpp
+// Parse and execute single statement
+Lexer lexer(line);
+Parser parser(lexer);
+parser.parseStatement();
+interpreter.execute(parser.getIR());
+```
+
+#### Variable Management
+```cpp
+// Variables persist across statements
+std::unordered_map<std::string, int> variables;
+```
+
+#### File Loading
+```cpp
+// Load complete program from file
+std::string allCode = readFile(filename);
+Parser parser(lexer);
+parser.parseProgram();  // Parse all statements
+```
+
+#### Input Handling
+```cpp
+// Handle user input with clear prompts
+std::cout << "Enter a number: ";
+std::cin >> value;
+variables[varName] = value;
+```
+
 ## Development Status
 
 ### Completed
@@ -271,10 +423,13 @@ make
 - ✅ Code generation with backpatching
 - ✅ CPU simulator with debug output
 - ✅ Complete compilation pipeline
+- ✅ Basic REPL (section-3)
+- ✅ REPL with input support (section-3.1)
 
 ### Future Enhancements
-- REPL
-- OS support 
+- Advanced REPL features
+- OS support
+- GUI interface 
 
 ## Technical Specifications
 
