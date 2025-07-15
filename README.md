@@ -44,6 +44,7 @@ minimal_turing_complete_CPU/
 ├── section-2.1-Pratt-parser/         # Advanced parser with operator precedence
 ├── section-3-REPL/                   # Basic REPL (Read-Eval-Print Loop)
 ├── section-3.1-REPL-input/           # REPL with input support
+├── section-3.2-REPL-with-simulated-cpu-backend/  # REPL with CPU backend
 └── README.md                         # This file
 ```
 
@@ -351,6 +352,277 @@ out result;
 halt;
 ```
 
+### Section 3.2: REPL with Simulated CPU Backend
+
+A sophisticated hybrid REPL that combines the convenience of interactive programming with the authenticity of running programs on the actual CPU simulator. This represents the most advanced REPL implementation in the project, offering a complete development-to-execution pipeline.
+
+#### Key Innovation: Dual Execution Modes
+
+This REPL introduces a novel approach by providing **two different execution backends** within the same interactive environment:
+
+1. **Interpreter Mode** (`.run`): Fast interpretation for development and testing
+2. **CPU Mode** (`.runfromCPU`): Authentic execution on the simulated CPU
+
+#### Why This Matters
+
+**Educational Value**: 
+- Students can develop programs interactively using the interpreter
+- Then run the same programs on the actual CPU to see "real" machine execution
+- Bridges the gap between high-level programming and low-level execution
+- Provides hands-on experience with the complete compilation pipeline
+
+**Debugging Benefits**:
+- Interpreter provides fast feedback and detailed error messages
+- CPU mode shows exactly how the program runs on the actual hardware
+- Helps identify differences between interpreted and compiled execution
+- Enables debugging at both high-level and machine-level
+
+**Performance Comparison**:
+- Interpreter: Fast development cycle, detailed debugging
+- CPU: Authentic performance characteristics, real machine behavior
+- Students can observe the performance trade-offs between interpretation and compilation
+
+**Learning Outcomes**:
+- Understanding of compilation vs interpretation
+- Appreciation of machine-level execution
+- Debugging skills at multiple abstraction levels
+- Performance analysis and optimization awareness
+
+#### New Command: `.runfromCPU`
+
+```bash
+>>> .runfromCPU hello.dsl
+```
+
+This command orchestrates a complete compilation and execution pipeline:
+
+1. **Compilation Phase**:
+   - Parses the DSL program using the full compiler pipeline
+   - Generates intermediate representation (IR)
+   - Converts IR to machine code with proper instruction encoding
+   - Resolves all labels and addresses through backpatching
+
+2. **Code Generation Phase**:
+   - Creates assembly listing for human-readable analysis
+   - Generates binary machine code file
+   - Produces hex dump for debugging and verification
+   - Validates code integrity and completeness
+
+3. **CPU Loading Phase**:
+   - Loads machine code into the CPU simulator at a specific memory address
+   - Initializes CPU registers and memory state
+   - Sets up program counter for execution
+   - Prepares output handling mechanisms
+
+4. **Execution Phase**:
+   - Runs the program on the actual CPU simulator
+   - Executes each instruction in the fetch-execute cycle
+   - Handles memory access, register operations, and control flow
+   - Manages program termination and output
+
+5. **Output Phase**:
+   - Captures output from CPU's output register (0xFF00)
+   - Displays results in a user-friendly format
+   - Provides execution statistics and debugging information
+
+#### Technical Implementation
+
+**Code Generation Pipeline**:
+```cpp
+// Full compilation pipeline integration
+Codegen gen(filename);           // Parse DSL and generate IR
+gen.writeToHex("output.bin", "output.hex");  // Generate binary files
+gen.writeToFile("output.asm");   // Generate assembly listing
+std::vector<uint8_t> code = gen.getCode();  // Get machine code
+```
+
+**CPU Integration**:
+```cpp
+// Direct CPU simulator integration
+MinimalCPU cpu;
+cpu.loadProgram(code, 0x2000);   // Load at specific address
+cpu.run();                       // Execute on CPU
+```
+
+**Output Handling**:
+```cpp
+// CPU detects writes to output register 0xFF00
+if (addr == 0xFF00) {
+    std::cout << static_cast<int>(R[rs]) << std::endl;
+}
+```
+
+**Memory Management**:
+```cpp
+// Proper memory layout and addressing
+const uint16_t CODE_START = 0x2000;  // Program loading address
+const uint16_t DATA_START = 0x8000;  // Variable storage area
+const uint16_t OUTPUT_REG = 0xFF00;  // Output register address
+```
+
+#### Advanced Features
+
+**Debug Output Control**:
+- Configurable debug output through Makefile switches
+- Assembly listing generation for code analysis
+- Hex dump generation for binary inspection
+- Execution trace capabilities
+
+**Error Handling**:
+- Comprehensive error reporting during compilation
+- CPU execution error detection and reporting
+- Memory access violation detection
+- Invalid instruction handling
+
+**File Management**:
+- Automatic file generation and cleanup
+- Temporary file handling for intermediate results
+- Output file organization and naming conventions
+- Cross-platform file path handling
+
+#### Usage Example
+
+```bash
+cd section-3.2-REPL-with-simulated-cpu-backend
+make
+./build/REPL
+
+>>> .runfromCPU hello.dsl
+# This compiles hello.dsl to machine code and runs it on the CPU
+# Output: 2
+
+>>> .load hello.dsl
+>>> .run
+# This runs the same program using the interpreter
+# Output: 2
+```
+
+**Complete Workflow Example**:
+```bash
+>>> let x = 10;
+>>> let y = 20;
+>>> let result = x + y;
+>>> out result;
+30
+
+>>> .runfromCPU complex_program.dsl
+# Compiles and runs complex_program.dsl on the CPU
+# Shows the complete pipeline from DSL to machine execution
+```
+
+#### Generated Files
+
+When using `.runfromCPU`, the system generates a comprehensive set of files for analysis:
+
+- **`output.asm`**: Human-readable assembly code
+  - Shows the complete instruction sequence
+  - Includes memory addresses and labels
+  - Provides comments for clarity
+  - Useful for understanding code generation
+
+- **`output.bin`**: Binary machine code
+  - Raw binary data for CPU execution
+  - Exact byte sequence loaded into CPU memory
+  - Used for program loading and execution
+
+- **`output.hex`**: Hex dump for analysis
+  - Hexadecimal representation of machine code
+  - Useful for debugging and verification
+  - Shows byte-by-byte instruction encoding
+
+#### Comparison: Interpreter vs CPU Execution
+
+| Aspect | Interpreter (`.run`) | CPU (`.runfromCPU`) |
+|--------|---------------------|---------------------|
+| **Speed** | Fast (immediate) | Slower (compilation + execution) |
+| **Memory** | High-level variables | Actual CPU memory layout |
+| **Debugging** | Rich error messages | CPU-level debugging |
+| **Authenticity** | Simulated execution | Real CPU behavior |
+| **Use Case** | Development, testing | Final verification, learning |
+| **Memory Layout** | Abstract variables | Physical memory addresses |
+| **Instruction Execution** | High-level interpretation | Actual CPU fetch-execute cycle |
+| **Performance Characteristics** | Optimized for development | Real hardware simulation |
+| **Error Detection** | Syntax and semantic errors | Hardware-level errors |
+| **Output Format** | Direct console output | CPU register-based output |
+
+#### Educational Benefits
+
+1. **Complete Pipeline Experience**: 
+   - Students see the full journey from DSL to machine execution
+   - Understanding of compilation phases and their purposes
+   - Appreciation of the complexity of modern compilers
+
+2. **Two Perspectives**: 
+   - High-level programming vs low-level execution
+   - Abstract vs concrete program representation
+   - Interpretation vs compilation trade-offs
+
+3. **Debugging Skills**: 
+   - Learn to debug at both interpreter and CPU levels
+   - Understanding of different error types and their sources
+   - Tools and techniques for each abstraction level
+
+4. **Performance Understanding**: 
+   - See the difference between interpreted and compiled execution
+   - Understanding of performance trade-offs
+   - Awareness of optimization opportunities
+
+5. **Hardware Awareness**: 
+   - Understand how programs actually run on the CPU
+   - Memory layout and addressing concepts
+   - Instruction execution and control flow
+
+6. **System Integration**: 
+   - How different components work together
+   - Interface design between software layers
+   - Error handling across system boundaries
+
+#### Advanced Usage Scenarios
+
+**Performance Analysis**:
+```bash
+>>> .runfromCPU benchmark.dsl
+# Compare execution times between interpreter and CPU modes
+# Analyze performance characteristics of different algorithms
+```
+
+**Debugging Complex Programs**:
+```bash
+>>> .runfromCPU buggy_program.dsl
+# Use CPU mode to identify hardware-level issues
+# Compare with interpreter mode for high-level debugging
+```
+
+**Educational Demonstrations**:
+```bash
+>>> .runfromCPU tutorial_program.dsl
+# Show students the complete compilation pipeline
+# Demonstrate the relationship between DSL and machine code
+```
+
+#### Technical Architecture
+
+**Component Integration**:
+- **REPL Interface**: User interaction and command processing
+- **Compiler Pipeline**: DSL parsing and code generation
+- **CPU Simulator**: Machine code execution
+- **File System**: Output file management
+- **Debug System**: Error reporting and analysis
+
+**Memory Management**:
+- **Code Section**: Program instructions loaded at 0x2000
+- **Data Section**: Variables allocated starting at 0x8000
+- **Output Register**: Program output at 0xFF00
+- **Stack Management**: Automatic memory allocation and cleanup
+
+**Error Handling Strategy**:
+- **Compilation Errors**: Detailed syntax and semantic error reporting
+- **Runtime Errors**: CPU-level error detection and reporting
+- **System Errors**: File I/O and memory management error handling
+- **User Errors**: Input validation and command error reporting
+
+This hybrid approach provides the best of both worlds: the convenience of interactive development with the authenticity of real CPU execution, making it an invaluable tool for computer architecture education and system programming understanding.
+
 ### REPL Architecture
 
 #### Core Components
@@ -425,6 +697,7 @@ variables[varName] = value;
 - ✅ Complete compilation pipeline
 - ✅ Basic REPL (section-3)
 - ✅ REPL with input support (section-3.1)
+- ✅ REPL with simulated CPU backend (section-3.2)
 
 ### Future Enhancements
 - Advanced REPL features
