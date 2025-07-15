@@ -6,7 +6,7 @@ A comprehensive implementation of a minimal Turing complete CPU with a custom Do
 
 This CPU demonstrates that **Turing completeness can be achieved with just 6 core instructions**. The design philosophy follows the principle of minimalism while maintaining full computational capability.
 
-### Core Instructions (6 fundamental operations)
+### Core Instructions (6 fundamental operations, 9 instructions in total)
 ```
 LOAD_VAR    - Load data from memory address to register
 LOAD_CONST  - Load immediate constant value to register  
