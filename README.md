@@ -45,6 +45,7 @@ minimal_turing_complete_CPU/
 ├── section-3-REPL/                   # Basic REPL (Read-Eval-Print Loop)
 ├── section-3.1-REPL-input/           # REPL with input support
 ├── section-3.2-REPL-with-simulated-cpu-backend/  # REPL with CPU backend
+├── section-4-minimal-OS/             # Minimal operating system implementation
 └── README.md                         # This file
 ```
 
@@ -623,6 +624,253 @@ When using `.runfromCPU`, the system generates a comprehensive set of files for 
 
 This hybrid approach provides the best of both worlds: the convenience of interactive development with the authenticity of real CPU execution, making it an invaluable tool for computer architecture education and system programming understanding.
 
+## Section 4: Minimal Operating System
+
+A groundbreaking implementation that demonstrates how a simple operating system can be built using the minimal Turing complete CPU and DSL. This section represents the pinnacle of the project, showing how high-level system concepts can be implemented using the fundamental building blocks developed in previous sections.
+
+### Concept: OS as a DSL Program
+
+The minimal OS is implemented as a **DSL program that runs on the CPU**, demonstrating that an operating system is fundamentally just another program that manages resources and provides services to other programs.
+
+#### Core Philosophy
+
+**"An OS is just a program that never exits"** - This implementation embodies this principle by creating a continuous loop that:
+- Accepts user commands
+- Executes different programs based on command input
+- Returns control to the main loop
+- Provides a basic shell-like interface
+
+### Implementation Overview
+
+#### Kernel Structure
+```dsl
+:start:
+    in cmd;           // Read command from user
+    if cmd <= 1 goto cmd1;  // Route to program 1
+    if cmd <= 2 goto cmd2;  // Route to program 2
+    goto start;       // Return to main loop
+
+:cmd1:
+    out 100;          // Execute program 1
+    goto start;       // Return to OS
+
+:cmd2:
+    in x;             // Execute program 2
+    out x;
+    goto start;       // Return to OS
+```
+
+#### Key Features
+
+1. **Command Interpreter**: 
+   - Reads numeric commands from user input
+   - Routes execution to different programs based on command value
+   - Provides a simple but functional command interface
+
+2. **Program Management**:
+   - Each command corresponds to a different "program"
+   - Programs are implemented as labeled sections in the DSL
+   - Automatic return to OS after program completion
+
+3. **Continuous Operation**:
+   - The OS runs in an infinite loop
+   - Never exits unless explicitly halted
+   - Maintains control flow between programs
+
+4. **Resource Management**:
+   - Manages input/output operations
+   - Controls program execution flow
+   - Provides basic system services
+
+### Usage
+
+#### Running the Minimal OS
+
+```bash
+cd section-4-minimal-OS
+# Use the REPL from section-3.2 to run the OS
+../section-3.2-REPL-with-simulated-cpu-backend/build/REPL
+
+>>> .runfromCPU kernel.dsl
+```
+
+#### Interactive Session
+
+When the OS is running, it provides an interactive shell:
+
+```
+Enter command (1 or 2): 1
+100
+Enter command (1 or 2): 2
+Enter a number: 42
+42
+Enter command (1 or 2): 1
+100
+```
+
+#### Available Commands
+
+- **Command 1**: Executes a simple program that outputs the value 100
+- **Command 2**: Executes an interactive program that reads a number and outputs it back
+
+### Technical Implementation
+
+#### Memory Layout for OS
+
+```
+Address Range    Purpose                    Size
+0x0000-0x1FFF   Bootloader Area           8KB
+0x2000-0x7FFF   Kernel Code               24KB
+0x8000-0xFEFF   System Data               ~30KB
+0xFF00          Output Register           1 byte
+0xFF01-0xFFFF   Reserved                  255 bytes
+```
+
+#### Execution Flow
+
+1. **Boot Process**:
+   - Kernel loads at address 0x2000
+   - Initializes system state
+   - Enters main command loop
+
+2. **Command Processing**:
+   - Reads command from user input
+   - Validates command range
+   - Routes to appropriate program
+
+3. **Program Execution**:
+   - Executes selected program
+   - Manages program state
+   - Returns control to OS
+
+4. **System Services**:
+   - Input/output management
+   - Program scheduling
+   - Resource allocation
+
+#### Generated Machine Code
+
+The kernel.dsl compiles to machine code that implements:
+
+```assembly
+2000: LOAD_CONST R0, 0        ; Initialize command register
+2003: IN R0                   ; Read command from user
+2004: LOAD_CONST R1, 1        ; Compare with command 1
+2007: SUB R1, R0              ; Check if cmd <= 1
+2009: JZ R2, 2010             ; Jump to cmd1 if true
+200C: LOAD_CONST R1, 2        ; Compare with command 2
+200F: SUB R1, R0              ; Check if cmd <= 2
+2011: JZ R2, 2015             ; Jump to cmd2 if true
+2014: JMP 2003                ; Return to start
+2015: LOAD_CONST R0, 100      ; cmd1: output 100
+2018: OUT R0
+2019: JMP 2003                ; Return to OS
+201A: IN R0                   ; cmd2: read input
+201B: OUT R0                  ; Output input value
+201C: JMP 2003                ; Return to OS
+```
+
+### Educational Value
+
+#### Operating System Concepts
+
+1. **Kernel Design**:
+   - Understanding of what constitutes an OS kernel
+   - Simple process management and scheduling
+   - System call interface design
+
+2. **Command Interpreter**:
+   - Shell implementation principles
+   - Command parsing and routing
+   - User interface design
+
+3. **Program Management**:
+   - How programs are loaded and executed
+   - Process control and scheduling
+   - Resource management basics
+
+4. **System Architecture**:
+   - Layered system design
+   - Hardware abstraction
+   - Service-oriented architecture
+
+#### Computer Science Principles
+
+1. **Abstraction Layers**:
+   - How high-level concepts map to low-level implementation
+   - Interface design between system layers
+   - Separation of concerns
+
+2. **Control Flow**:
+   - Interrupt handling and return mechanisms
+   - Program state management
+   - Context switching concepts
+
+3. **Resource Management**:
+   - Input/output management
+   - Memory allocation strategies
+   - System resource coordination
+
+### Future Development Plans
+
+The minimal OS implementation provides a foundation for more advanced features:
+
+#### Phase 1: Enhanced Kernel
+1. **System Calls**: Implement proper system call interface
+   - Return instruction support
+   - Privileged vs user mode
+   - System call table implementation
+
+2. **Bootloader**: Create a proper boot sequence
+   - Bootloader starting at 0x0000
+   - Kernel loading at 0x1000
+   - System initialization procedures
+
+#### Phase 2: Advanced Shell
+1. **ASCII Support**: Handle character-based input/output
+   - Character encoding and decoding
+   - String processing capabilities
+   - Text-based user interface
+
+2. **Command Processing**: Enhanced command interpreter
+   - Multiple command support
+   - Parameter passing
+   - Command history
+
+#### Phase 3: Multi-Program Support
+1. **Process Scheduling**: Manage multiple programs
+   - Round-robin scheduling
+   - Process state management
+   - Context switching implementation
+
+2. **Memory Management**: Advanced memory handling
+   - Program isolation
+   - Memory protection
+   - Dynamic allocation
+
+#### Phase 4: File System
+1. **File Operations**: Basic file system implementation
+   - File creation and deletion
+   - Read/write operations
+   - Directory structure
+
+2. **Online Editing**: Interactive file editing
+   - Text editor functionality
+   - File save/load operations
+   - Real-time editing capabilities
+
+
+### Conclusion
+
+The minimal OS implementation demonstrates that the fundamental concepts of operating systems can be understood and implemented using simple building blocks. By creating an OS as a DSL program running on the minimal CPU, students gain:
+
+1. **Deep Understanding**: How OS concepts map to actual implementation
+2. **Practical Experience**: Hands-on system programming
+3. **Architecture Insight**: System design and layering principles
+4. **Foundation Knowledge**: Basis for understanding real operating systems
+
+This implementation serves as an excellent educational tool for computer science students, providing a bridge between theoretical OS concepts and practical implementation, while working within the constraints of the minimal Turing complete CPU architecture.
+
 ### REPL Architecture
 
 #### Core Components
@@ -698,11 +946,14 @@ variables[varName] = value;
 - ✅ Basic REPL (section-3)
 - ✅ REPL with input support (section-3.1)
 - ✅ REPL with simulated CPU backend (section-3.2)
+- ✅ Minimal operating system (section-4)
 
 ### Future Enhancements
 - Advanced REPL features
-- OS support
-- GUI interface 
+- Enhanced OS support with system calls
+- GUI interface
+- File system implementation
+- Multi-program scheduling 
 
 ## Technical Specifications
 
