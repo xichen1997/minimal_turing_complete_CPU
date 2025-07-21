@@ -1,0 +1,63 @@
+⏺ Update Todos
+  ⎿  ☐ Add more comparison operators to DSL (>, >=, ==, !=)                  
+     ☐ Implement RETURN instruction for subroutines
+     ☐ Add stack pointer (SP) register and stack operations (PUSH, POP)
+     ☐ Enhance DSL with function/subroutine syntax (call, return)
+     ☐ Add more arithmetic instructions (MUL, DIV, MOD)
+     ☐ Implement ASCII character support in CPU and DSL
+     ☐ Create proper bootloader starting at 0x0000
+     ☐ Move kernel to start at 0x1000 with bootloader loading
+     ☐ Add system call instruction and kernel/user mode separation
+     ☐ Implement string operations and text I/O
+     ☐ Create enhanced shell with ASCII text commands
+     ☐ Add debugging tools (breakpoints, step execution, register inspection)
+     ☐ Implement process control blocks (PCB) and process management
+     ☐ Add context switching for multi-program support
+     ☐ Implement round-robin process scheduling
+     ☐ Add memory protection and program isolation
+     ☐ Create basic file system with file operations
+     ☐ Implement online text editor for file editing
+     ☐ Add inter-process communication mechanisms
+     ☐ Implement virtual memory and paging system
+
+⏺ Here's your development roadmap organized in logical progression:
+
+  Phase 1: Core Language Extensions (High Priority)
+
+  Tasks 1-4 build essential programming constructs:
+  1. Add comparison operators - Extends your DSL's expressiveness
+  2. Implement RETURN instruction - Enables proper function calls
+  3. Add stack operations - Foundation for function calls and local variables
+  4. Enhance DSL with functions - High-level programming support
+
+  Phase 2: Enhanced CPU & System Foundation (Medium Priority)
+
+  Tasks 5-8 strengthen the underlying system:
+  5. More arithmetic operations - Richer computational capabilities
+  6. ASCII character support - Text-based programming
+  7. Create bootloader - Proper system initialization
+  8. Move kernel to 0x1000 - Standard memory layout
+
+  Phase 3: Operating System Services (Medium Priority)
+
+  Tasks 9-12 add OS-level functionality:
+  9. System calls & privilege modes - Kernel/user separation
+  10. String operations - Text processing capabilities
+  11. Enhanced ASCII shell - Better user interface
+  12. Debugging tools - Development environment
+
+  Phase 4: Advanced OS Features (Low Priority)
+
+  Tasks 13-16 implement multi-programming:
+  13. Process control blocks - Process management foundation
+  14. Context switching - Multi-program execution
+  15. Process scheduling - Fair resource allocation
+  16. Memory protection - Program isolation
+
+  Phase 5: File System & Advanced Features (Low Priority)
+
+  Tasks 17-20 add sophisticated capabilities:
+  17. Basic file system - Persistent storage
+  18. Online text editor - Interactive file editing
+  19. Inter-process communication - Process coordination
+  20. Virtual memory - Advanced memory management

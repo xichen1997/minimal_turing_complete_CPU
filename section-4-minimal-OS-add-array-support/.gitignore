@@ -1,3 +1,20 @@
 build/*
 build/
 
+# Claude IDE files
+.claude/
+.claude
+*.claude
+
+# Temporary files
+*.tmp
+*.temp
+
+# Generated files
+output.asm
+output.bin
+output.hex
+
+# Test artifacts
+test_*.dsl
+

@@ -1,0 +1,39 @@
+# Claude IDE files
+.claude/
+.claude
+*.claude
+
+# Build directories
+build/
+build/*
+
+# Generated files
+output.asm
+output.bin
+output.hex
+
+# Temporary files
+*.tmp
+*.temp
+
+# Test artifacts
+test_*.dsl
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Logs
+*.log

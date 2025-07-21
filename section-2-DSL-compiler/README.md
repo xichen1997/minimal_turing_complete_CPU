@@ -13,9 +13,12 @@
   ```
   will be parsed into:
   ```
-  1 + 2 -> __temp__0
-  __temp0__ + 3 -> __temp1__ 
-  __temp1 -> a
+  1 -> __temp__0
+  2 -> __temp__1
+  __temp__0 + __temp__1 -> __temp__2
+  3 -> __temp__3
+  __temp__2 + __temp__3 -> temp__4
+  __temp__4 -> a
   ```
 
 - **Intermediate Representation (IR)**:  
