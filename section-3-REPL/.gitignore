@@ -1,4 +1,9 @@
 build/*
 build
 
+# Claude IDE files
+.claude/
+.claude
+*.claude
+
 

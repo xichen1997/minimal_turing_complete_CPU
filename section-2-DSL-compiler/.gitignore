@@ -56,3 +56,8 @@ Thumbs.db
 # Backup files
 *.bak
 *.backup 
+
+# Claude IDE files
+.claude/
+.claude
+*.claude

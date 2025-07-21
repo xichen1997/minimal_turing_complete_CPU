@@ -1,14 +1,10 @@
 build/*
-.claude/*
-.claude-history/*
-.claude-history-2/*
-.claude-history-3/*
-.claude-history-4/*
-.claude-history-5/*
-.claude-history-6/*
-.claude-history-7/*
-.claude-history-8/*
-.claude-history-9/*
+
+# Claude IDE files
+.claude/
+.claude
+*.claude
+.claude-history*/
 
 
 
