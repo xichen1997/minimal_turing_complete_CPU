@@ -43,13 +43,6 @@ What we could do next?
 
 
 
-## Time to action
-
-<!-- DSL 写法	出现位置	所需 Parser 行为
-let x = buffer[i] + 2;	表达式右值	parseExpr() 调用 parsePrefixExpr() 处理 buffer[i] 为一个 temp
-buffer[i] = x;	赋值语句左值	parseStatement() 调用 parseArrayAssignment() 或分支中处理
-if buffer[i] <= x goto L1;	条件判断	parseExpr() 能处理 buffer[i] 为一个变量一样 -->
-
 ### Array Support Implementation
 
 This section introduces comprehensive array support to our DSL, enabling programs to work with collections of data - a crucial feature for building more sophisticated systems like file systems, buffers, and data structures.

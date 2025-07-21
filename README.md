@@ -948,12 +948,121 @@ variables[varName] = value;
 - ✅ REPL with simulated CPU backend (section-3.2)
 - ✅ Minimal operating system (section-4)
 
+### Section 4: Array Support Implementation
+
+Building on the minimal OS foundation, section-4 introduces **comprehensive array support** to the DSL, enabling the development of more sophisticated programs that can handle collections of data - a crucial requirement for implementing file systems, buffers, and advanced data structures.
+
+#### Key Innovation: Native Array Operations
+
+This implementation adds **first-class array support** to the entire system stack, from lexer to CPU instruction set:
+
+**New DSL Syntax**:
+```dsl
+let buffer[32];           // Array declaration with fixed size
+buffer[0] = 42;          // Array element assignment  
+let x = buffer[i] + 2;   // Array element access in expressions
+out buffer[0];           // Output array elements
+buffer[i] = buffer[j];   // Copy between array elements
+```
+
+#### Complete System Integration
+
+**1. Lexer Extensions**:
+- Added `[` and `]` bracket token types (`OP_LBRACKET`, `OP_RBRACKET`)
+- Enhanced tokenization to handle array syntax in all contexts
+
+**2. Parser Enhancements**:
+- **Array Declaration**: `let arr[5];` creates arrays with specified size
+- **Array Assignment**: `arr[index] = value;` for element storage
+- **Array Access**: `arr[index]` in expressions and output statements
+- **Variable Indices**: Support for `arr[i]` where `i` is a variable
+
+**3. Intermediate Representation (IR)**:
+- `ARRAY_DECL`: Declares array with specified size
+- `LOAD_INDEXED`: Loads `array[index]` into temporary variable
+- `STORE_INDEXED`: Stores value into `array[index]`
+
+**4. Memory Management System**:
+- **64KB Simulated Memory**: Virtual memory system for array storage
+- **Address Allocation**: Consecutive memory allocation starting at 0x1000
+- **Bounds Checking**: Runtime validation of array indices
+- **Variable Resolution**: Handles both constants and variables as indices
+
+**5. CPU Instruction Set Extensions**:
+- **`LOAD_INDEXED` (0x0A)**: `R4 = memory[R0 + R2]` - indexed memory load
+- **`STORE_INDEXED` (0x0B)**: `memory[R0 + R2] = R4` - indexed memory store
+- **Register Protocol**: R0=base address, R2=index, R4=data
+
+#### Advanced Code Generation
+
+**Memory Layout**:
+```
+[0x2000 - 0x7FFF]: Code segment (32KB)
+[0x8000 - 0xFF00]: Data segment with arrays (~32KB)
+  └── Arrays allocated consecutively:
+      arr[0] → 0x8000, arr[1] → 0x8001, arr[2] → 0x8002...
+[0xFF00]: Output register
+[0xFF01]: Input register
+```
+
+**Generated Assembly Example**:
+```assembly
+LOAD R2, index_addr     ; Load array index
+LOAD R0, 0x80          ; Load base address (high byte)
+LOAD R1, 0x00          ; Load base address (low byte)  
+LOAD_INDEXED           ; Execute: R4 = memory[R0R1 + R2]
+STORE result_addr, R4   ; Store result
+```
+
+#### Comprehensive Testing Suite
+
+**Test Coverage** (15 comprehensive tests):
+- **Lexer Tests**: Bracket token recognition and array syntax tokenization
+- **Parser Tests**: All array operations (declaration, assignment, access, output)
+- **Interpreter Tests**: End-to-end execution with variable indices and arithmetic
+- **Codegen Tests**: Machine code generation and HALT instruction verification
+- **Error Handling**: Array bounds checking and runtime validation
+
+**Testing Infrastructure**:
+```bash
+# Run comprehensive array test suite
+make test-arrays
+
+# Individual test categories
+cd t/arrays && make test
+```
+
+#### Critical Bug Fixes
+
+**Fixed Spurious HALT Instructions**: 
+- **Problem**: Incomplete 16-bit address loading caused `0x00` bytes to be misinterpreted as HALT instructions
+- **Solution**: Proper 16-bit address loading using separate R0/R1 register pairs
+- **Result**: Clean assembly output with correct instruction positioning
+
+#### Educational Value
+
+**Complete Pipeline Understanding**:
+1. **Syntax Design**: How language features translate to grammar rules
+2. **Memory Management**: Virtual memory systems and address allocation
+3. **Code Generation**: Complex instruction sequence generation
+4. **CPU Architecture**: Indexed addressing modes and register protocols
+5. **System Testing**: Comprehensive test methodologies
+
+**Foundational Technology**:
+- **String Processing**: Arrays enable character string manipulation
+- **Buffer Management**: I/O buffer implementation for OS services  
+- **Data Structures**: Foundation for stacks, queues, and hash tables
+- **File Systems**: Array-based file content storage and manipulation
+
+This array implementation provides the essential infrastructure for building sophisticated system software, transforming the minimal CPU from a basic calculator into a platform capable of supporting real operating system services and file system operations.
+
 ### Future Enhancements
 - Advanced REPL features
 - Enhanced OS support with system calls
 - GUI interface
-- File system implementation
-- Multi-program scheduling 
+- File system implementation (enabled by array support)
+- Multi-program scheduling
+- Dynamic memory allocation using array primitives 
 
 ## Technical Specifications
 

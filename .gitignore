@@ -1,6 +1,7 @@
 # Claude IDE files
 .claude/
 .claude
+*/.claude
 *.claude
 
 # Build directories
