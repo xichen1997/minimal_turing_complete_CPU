@@ -7,6 +7,8 @@
 # Build directories
 build/
 build/*
+*/build/
+*/build/*
 
 # Generated files
 output.asm

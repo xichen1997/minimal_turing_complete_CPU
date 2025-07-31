@@ -4,6 +4,8 @@ CXXFLAGS = -std=c++17 -Iinclude -g
 TARGET = REPL
 
 BUILD_DIR = build
+os: $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(BUILD_DIR)/$(TARGET) enhanced_integrated_shell.cpp
 
 # compile the compiler
 compiler: $(BUILD_DIR)

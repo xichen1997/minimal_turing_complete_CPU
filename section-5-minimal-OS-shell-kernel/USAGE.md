@@ -3,54 +3,59 @@
 ## Overview
 This minimal Shell-OS runs entirely on your custom CPU architecture using only registers R0-R7 and direct memory access. No stack pointer required.
 
-## Building and Running
+Currently, our DSL is not low-level enough to operate the memory effectively, so we need to use the machine code to write a bootloader, a OS-shell program and customized programs.
 
-### 1. Compile the Shell-OS
-```bash
-make compiler
-./build/compiler shell_os.txt
+The design is pretty simple, the program is being writen in c++ code `enhanced_integrated_shell.cpp`, which assemble the bootloader, kernel, and customized programs. And it will be loaded into CPU.
+
+The bootloader will jump to the shell-os kernel area, and our programs can be choisen from the CLI interface. It looks like the embedding system chips, we burns a pre-built target image into the memory area and the system will run forever. 
+
+But it can be called a operating system, though very simple and stupid.
+
+### Memory Layout
+```
+0x0000-0x0FFF : System/Boot area (reserved)
+0x1000-0x1FFF : Shell/OS kernel code 
+kernelEND-0x8000: customize programs, after running will return to shell-os
+0x8000        : Free memory/heap (for data)
+0xFF00-0xFFFF : I/O and system area (4KB)
 ```
 
 ### 2. Run Shell-OS on CPU
 ```bash
 # Method 1: Using REPL
-make all
-./build/REPL
->>> .runfromCPU shell_os.txt
+make os
 
 # Method 2: Using test harness
-g++ -std=c++17 -Iinclude -o build/test_shell test_shell.cpp src/codegen.cpp src/parser.cpp src/lexer.cpp
-echo "104" | ./build/test_shell  # Send 'h' command
-```
-
-## Memory Layout
-```
-0x0000-0x0FFF: Bootloader space (reserved)
-0x1000-0x2FFF: Shell-OS code (starts here)
-0x3000-0x7FFF: User program space
-0x8000-0xFDFF: Dynamic data/variables
-0xFE00-0xFFFF: I/O and system area
+make run
 ```
 
 ## Shell Commands
 
 When the Shell-OS starts, you'll see:
+```bash
+./build/REPL
+========================================
+    Enhanced Integrated Shell v6.0     
+  Interactive Calculator & Memory!      
+========================================
+Enhanced system size: 2643 bytes
+Memory constraint: Must not exceed 0x8000 (32768 bytes)
+✓ Enhanced system fits within memory constraint
+End address: 0x1a53
+
+New Features:
+• Interactive Calculator (command 'c')
+• Memory Viewer (command 'm')
+• Enhanced error messages
+• Improved help system
+========================================
+
+===========================
+| Enhanced OS v6.0 |
+===========================
+Commands: h,1,c,m,q (calc & memory!)
 ```
-MiniOS
->> 
-```
 
-### Available Commands:
-- **h** - Show help message
-- **r** - Run user program (placeholder)  
-- **q** - Quit shell-OS
-- **Any other key** - Shows "Unknown" message
-
-### Input Format:
-- Enter single ASCII characters directly (e.g., 'h', 'r', 'q')
-- The system now accepts character input instead of numeric codes
-
-## Example Session
 ```bash
 $ ./build/REPL
 MiniREPL v0.1

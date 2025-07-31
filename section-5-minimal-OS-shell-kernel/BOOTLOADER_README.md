@@ -21,7 +21,7 @@ This is a complete bootloader implementation that mimics real computer boot proc
     ├── OS copy routine  
     └── Jump to OS code
 
-0x1000-0x1FFF : OS Runtime Location (4KB)
+0x1000-0x1FFF : OS-Shell Runtime Location (4KB)
     ├── OS kernel code (copied by bootloader)
     ├── Shell interface
     └── Program management
