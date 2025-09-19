@@ -106,6 +106,14 @@ void Codegen::generateCode() {
                 uint16_t varAddress = allocateVar(instruction.arg1);
                 code.push_back(varAddress >> 8);
                 code.push_back(varAddress & 0xFF);
+                if (!instruction.result.empty()) {
+                    // Persist the loaded value into the destination temp
+                    code.push_back(0x03); // STORE addr, Rs
+                    uint16_t destAddress = allocateVar(instruction.result);
+                    code.push_back(destAddress >> 8);
+                    code.push_back(destAddress & 0xFF);
+                    code.push_back(0x00); // R0
+                }
                 break;
             }
             case OpCode::LOAD_CONST:{
@@ -113,6 +121,14 @@ void Codegen::generateCode() {
                 code.push_back(0x02);
                 code.push_back(0x00); // R0
                 code.push_back(uint8_t(std::stoi(instruction.arg1))); // const
+                if (!instruction.result.empty()) {
+                    // Store the immediate into the destination temp
+                    code.push_back(0x03); // STORE addr, Rs
+                    uint16_t destAddress = allocateVar(instruction.result);
+                    code.push_back(destAddress >> 8);
+                    code.push_back(destAddress & 0xFF);
+                    code.push_back(0x00); // R0
+                }
                 break;
             }
             case OpCode::STORE: {
@@ -664,7 +680,6 @@ void Codegen::writeToHex(std::string filename) {
     
     file.close();
 }
-
 
 
 
